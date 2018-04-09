@@ -73,8 +73,8 @@
         <module>tooling</module>
         <module>manual</module>
         <module>specs</module>
+        <module>examples</module>
         <module>assemblies</module>
-        <module>demos</module>
         <module>archetypes</module>
         <module>itests</module>
     </modules>
