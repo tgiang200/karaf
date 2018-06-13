@@ -94,10 +94,20 @@ public class Activator extends BaseActivator implements ManagedService {
         int rmiRegistryPort = getInt("rmiRegistryPort", 1099);
         String rmiServerHost = getString("rmiServerHost", "0.0.0.0");
         int rmiServerPort = getInt("rmiServerPort", 44444);
+        String jmxmpHost = getString("jmxmpHost", "0.0.0.0");
+        int jmxmpPort = getInt("jmxmpPort", 9999);
 
         String jmxRealm = getString("jmxRealm", "karaf");
-        String serviceUrl = getString("serviceUrl",
+        String rmiServiceUrl = getString("rmiServiceUrl",
                 "service:jmx:rmi://" + rmiServerHost + ":" + rmiServerPort + "/jndi/rmi://" + rmiRegistryHost + ":" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
+
+        System.out.println("JMXMP Host: " + jmxmpHost);
+        System.out.println("JMXMP Port: " + jmxmpPort);
+
+        String jmxmpServiceUrl = getString("jmxmpServiceUrl",
+                "service:jmx:jmxmp://" + jmxmpHost + ":" + jmxmpPort);
+
+        System.out.println("JMXMP URL: " + jmxmpServiceUrl);
 
         boolean daemon = getBoolean("daemon", true);
         boolean threaded = getBoolean("threaded", true);
@@ -138,7 +148,8 @@ public class Activator extends BaseActivator implements ManagedService {
 
         connectorServerFactory = new ConnectorServerFactory();
         connectorServerFactory.setServer(mbeanServer);
-        connectorServerFactory.setServiceUrl(serviceUrl);
+        connectorServerFactory.setRmiServiceUrl(rmiServiceUrl);
+        connectorServerFactory.setJmxmpServiceUrl(jmxmpServiceUrl);
         connectorServerFactory.setGuard(guard);
         connectorServerFactory.setRmiServerHost(rmiServerHost);
         connectorServerFactory.setDaemon(daemon);
@@ -160,6 +171,7 @@ public class Activator extends BaseActivator implements ManagedService {
             connectorServerFactory.init();
         } catch (Exception e) {
             LOG.error("Can't init JMXConnectorServer: " + e.getMessage());
+            e.printStackTrace();
         }
 
         JMXSecurityMBeanImpl securityMBean = new JMXSecurityMBeanImpl();

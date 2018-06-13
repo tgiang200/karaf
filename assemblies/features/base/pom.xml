@@ -82,6 +82,12 @@
             <artifactId>org.apache.felix.framework</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.external</groupId>
+            <artifactId>opendmk_jmxremote_optional_jar</artifactId>
+            <version>1.0-b01-ea</version>
+            <scope>runtime</scope>
+        </dependency>
 
     </dependencies>
 
@@ -162,6 +168,11 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.core</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.external</groupId>
+                                    <artifactId>opendmk_jmxremote_optional_jar</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

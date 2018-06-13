@@ -55,13 +55,15 @@ public class ConnectorServerFactory {
 
     private MBeanServer server;
     private KarafMBeanServerGuard guard;
-    private String serviceUrl;
+    private String rmiServiceUrl;
+    private String jmxmpServiceUrl;
     private String rmiServerHost;
     private Map<String, Object> environment;
     private ObjectName objectName;
     private boolean threaded = false;
     private boolean daemon = false;
-    private JMXConnectorServer connectorServer;
+    private JMXConnectorServer rmiConnectorServer;
+    private JMXConnectorServer jmxmpConnectorServer;
 
     private long keyStoreAvailabilityTimeout = 5000;
     private AuthenticatorType authenticatorType = AuthenticatorType.PASSWORD;
@@ -89,12 +91,20 @@ public class ConnectorServerFactory {
         this.guard = guard;
     }
 
-    public String getServiceUrl() {
-        return serviceUrl;
+    public String getRmiServiceUrl() {
+        return rmiServiceUrl;
     }
 
-    public void setServiceUrl(String serviceUrl) {
-        this.serviceUrl = serviceUrl;
+    public void setRmiServiceUrl(String rmiServiceUrl) {
+        this.rmiServiceUrl = rmiServiceUrl;
+    }
+
+    public String getJmxmpServiceUrl() {
+        return jmxmpServiceUrl;
+    }
+
+    public void setJmxmpServiceUrl(String jmxmpServiceUrl) {
+        this.jmxmpServiceUrl = jmxmpServiceUrl;
     }
 
     public String getRmiServerHost() {
@@ -235,7 +245,9 @@ public class ConnectorServerFactory {
         if (this.server == null) {
             throw new IllegalArgumentException("server must be set");
         }
-        JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
+        JMXServiceURL rmiServiceUrl = new JMXServiceURL(this.rmiServiceUrl);
+        System.out.println("JMXMP: " + this.jmxmpServiceUrl);
+        JMXServiceURL jmxmpServiceUrl = new JMXServiceURL(this.jmxmpServiceUrl);
         if ( isClientAuth() ) {
             this.secured = true;
         }
@@ -250,12 +262,15 @@ public class ConnectorServerFactory {
             this.environment.remove( "jmx.remote.authenticator" );
         }
 
+        this.environment.put(JMXConnectorServerFactory.PROTOCOL_PROVIDER_PACKAGES, "com.sun.jmx.remote.protocol");
+
         MBeanInvocationHandler handler = new MBeanInvocationHandler(server, guard);
         MBeanServer guardedServer = (MBeanServer) Proxy.newProxyInstance(server.getClass().getClassLoader(), new Class[]{ MBeanServer.class }, handler);
-        this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, guardedServer);
+        this.rmiConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(rmiServiceUrl, this.environment, guardedServer);
+        this.jmxmpConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxmpServiceUrl, this.environment, guardedServer);
 
         if (this.objectName != null) {
-            this.server.registerMBean(this.connectorServer, this.objectName);
+            this.server.registerMBean(this.rmiConnectorServer, this.objectName);
         }
 
         try {
@@ -263,7 +278,8 @@ public class ConnectorServerFactory {
                 Thread connectorThread = new Thread(() -> {
                     try {
                         Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
-                        connectorServer.start();
+                        rmiConnectorServer.start();
+                        jmxmpConnectorServer.start();
                     } catch (IOException ex) {
                         if (ex.getCause() instanceof BindException){
                             // we want just the port message
@@ -279,11 +295,12 @@ public class ConnectorServerFactory {
                         throw new RuntimeException("Could not start JMX connector server", ex);
                     }
                 });
-                connectorThread.setName("JMX Connector Thread [" + this.serviceUrl + "]");
+                connectorThread.setName("JMX Connector Thread [" + this.rmiServiceUrl + "]");
                 connectorThread.setDaemon(this.daemon);
                 connectorThread.start();
             } else {
-                this.connectorServer.start();
+                this.rmiConnectorServer.start();
+                this.jmxmpConnectorServer.start();
             }
         } catch (Exception ex) {
             doUnregister(this.objectName);
@@ -293,8 +310,11 @@ public class ConnectorServerFactory {
 
     public void destroy() throws Exception {
         try {
-            if (this.connectorServer != null) {
-                this.connectorServer.stop();
+            if (this.rmiConnectorServer != null) {
+                this.rmiConnectorServer.stop();
+            }
+            if (this.jmxmpConnectorServer != null) {
+                this.jmxmpConnectorServer.stop();
             }
         } finally {
             doUnregister(this.objectName);

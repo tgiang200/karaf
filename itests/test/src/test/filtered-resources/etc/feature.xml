@@ -837,7 +837,7 @@
             #
             # The service URL for the JMXConnectorServer
             #
-            serviceUrl = service:jmx:rmi://${rmiServerHost}:${rmiServerPort}/jndi/rmi://${rmiRegistryHost}:${rmiRegistryPort}/karaf-${karaf.name}
+            rmiServiceUrl = service:jmx:rmi://${rmiServerHost}:${rmiServerPort}/jndi/rmi://${rmiRegistryHost}:${rmiRegistryPort}/karaf-${karaf.name}
 
             #
             # Whether any threads started for the JMXConnectorServer should be started as daemon threads

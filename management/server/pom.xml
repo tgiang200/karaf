@@ -114,6 +114,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.event*;resolution:=optional,
+                            com.sun.jmx.remote.protocol;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
