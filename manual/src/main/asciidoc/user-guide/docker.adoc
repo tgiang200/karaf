@@ -1,0 +1,136 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Docker
+
+The Docker feature allows you to:
+
+- manipulate Docker containers directly from Apache Karaf
+- create a Docker container based on the current running Apache Karaf instance (named provisioning)
+
+Docker is an optional feature from the Karaf Enterprise features repository.
+
+It means that you have to install the `docker` feature first:
+
+----
+karaf@root()> feature:install docker
+----
+
+The Karaf Docker feature uses the Docker HTTP layer to communicate with the Docker backend. It could be on the same local
+machine where Apache Karaf instance is running or a remote Docker machine.
+
+The location of the Docker backend (URL) can be specified as an option to the `docker:*` commands. By default, Karaf Docker
+feature uses `http://localhost:2375`. Please, take a look on the Docker documentation how to enable remote API using HTTP
+for Docker daemon. As short notice, you just have to enable `tcp` transport connector enabled for the docker daemon.
+You have to do it using the `-H` option on `dockerd`:
+
+----
+/usr/bin/dockerd -H fd:// -H tcp://localhost:2375
+----
+
+Apache Karaf Docker feature exposes `DockerService` OSGi service that you can use programmatically (the `dockerClient:*` commands
+and the `DockerMBean` use the `DockerService` service).
+
+==== Information about the Docker backend
+
+The `docker:info` command provides some details about the Docker backend, like the number of images, the number of containers, the current status, and much more:
+
+----
+karaf@root()> docker:info
+----
+
+==== Bootstrap Docker container
+
+The Karaf Docker feature can create a Docker container based on a given image (bootstrapping).
+
+You can use either the `docker:bootstrap` shell command or the `bootstrap()` operation on the JMX `DockerMBean`.
+
+For instance, here's an example of the `docker:bootstrap` to create a Docker container based on `elasticsearch` instance:
+
+----
+karaf@root()> docker:bootstrap --image elasticsearch elasticsearch
+----
+
+You can also use the `bootstrap()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== List of Docker containers
+
+You can list the Docker containers currently managed by the Karaf Docker service:
+
+----
+karaf@root()> docker:containers
+elasticsearch
+----
+
+You can also use the containers attribute on the `DockerMBean` JMX MBean or the `containers()` method on the `DockerService` service.
+
+==== Provision Docker container
+
+Provisioning is a specific kind of boostrapping: it created a Docker container using the current running Apache Karaf instance.
+
+You can then reuse this container to create a Docker image and to duplicate the container on another Docker backend via dockerhub.
+
+----
+karaf@root()> docker:provision my-karaf
+----
+
+You can also use the `provision()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Start Docker container
+
+You can start a Docker container using the `docker:start` command:
+
+----
+karaf@root()> docker:start my-container
+----
+
+You can also use the `start()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Stop Docker container
+
+You can stop a Docker container using the `docker:stop` command:
+
+----
+karaf@root()> docker:stop my-container
+----
+
+You can also use the `stop()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Delete Docker container
+
+You can delete an existing Docker container using the `docker:delete` commmand:
+
+----
+karaf@root()> docker:delete my-container
+----
+
+You can also use the `delete()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== List Docker images
+
+Apache Karaf Docker feature also supports Docker images management.
+
+You can list the Docker images available (previously pulled) using `docker:images` command:
+
+----
+karaf@root()> docker:images
+----
+
+==== Pulling Docker image
+
+You can pull a Docker image using the `docker:pull` command:
+
+----
+karaf@root()> docker:pull elasticsearch
+----
