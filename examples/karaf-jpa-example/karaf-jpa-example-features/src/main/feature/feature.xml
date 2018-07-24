@@ -20,7 +20,7 @@
 
     <feature name="karaf-jpa-example-datasource" version="${project.version}">
         <config name="org.ops4j.datasource-booking">
-            osgi.jdbc.driver.name=H2-pool-xa
+            osgi.jdbc.driver.class=org.h2.Driver
             databaseName=booking;create=true
             dataSourceName=booking
         </config>
@@ -31,16 +31,20 @@
 
     <feature name="karaf-jpa-example-common" version="${project.version}">
         <feature>transaction</feature>
+        <feature>jndi</feature>
         <feature>pax-jdbc-config</feature>
         <feature>pax-jdbc-h2</feature>
         <feature>pax-jdbc-pool-dbcp2</feature>
         <feature>jdbc</feature>
         <feature version="[2,3)">jpa</feature>
-        <feature version="6.0.10.Final">hibernate</feature>
+        <feature version="[5,6)">hibernate</feature>
+        <capability>
+            osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
+        </capability>
     </feature>
 
     <feature name="karaf-jpa-example-provider" version="${project.version}">
-        <feature>aries-blueprint</feature>
+        <feature dependency="true">aries-blueprint</feature>
         <feature version="${project.version}">karaf-jpa-example-common</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider/${project.version}</bundle>
     </feature>
