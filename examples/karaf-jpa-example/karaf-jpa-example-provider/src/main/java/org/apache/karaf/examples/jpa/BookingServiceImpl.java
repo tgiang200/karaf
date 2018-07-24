@@ -45,14 +45,14 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(Transactional.TxType.SUPPORTS)
     @Override
     public List<Booking> list() {
-        TypedQuery<Booking> query = entityManager.createQuery("SELECT booking FROM Booking", Booking.class);
+        TypedQuery<Booking> query = entityManager.createQuery("SELECT b FROM Booking b", Booking.class);
         return query.getResultList();
     }
 
     @Transactional(Transactional.TxType.SUPPORTS)
     @Override
     public Booking get(Long id) {
-        TypedQuery<Booking> query = entityManager.createQuery("SELECT booking FROM Booking WHERE booking.id=:id", Booking.class);
+        TypedQuery<Booking> query = entityManager.createQuery("SELECT b FROM Booking b WHERE b.id=:id", Booking.class);
         query.setParameter("id", id);
         Booking booking = null;
         try {

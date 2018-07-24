@@ -34,6 +34,7 @@ public class ListBean {
 
     public void start() {
         thread = new ListThread(bookingService);
+        thread.start();
     }
 
     public void stop() {
